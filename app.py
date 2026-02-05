@@ -61,11 +61,16 @@ if uploaded_files and st.session_state.qa_chain is None:
                 docs = load_documents(temp_file.name, file.name)
                 all_docs.extend(docs)
 
-            # Create Vector Store
-            db = create_vector_store(all_docs)
+            try:
+                db = create_vector_store(all_docs)
+                st.session_state.qa_chain = build_qa_chain(db)
+                st.success("✅ Documents processed successfully!")
 
-            # Build QA Chain
-            st.session_state.qa_chain = build_qa_chain(db)
+            except Exception as e:
+                st.error("❌ No readable text found in the uploaded document.")
+                st.warning("Please upload a text-based PDF (not scanned images).")
+                st.stop()
+
 
         st.success("✅ Documents processed successfully! You can now chat below.")
 
